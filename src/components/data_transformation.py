@@ -75,6 +75,7 @@ class DataTransformation:
             target_feature_test_df = test_df[target_column_name]
             
             logging.info("Applying preprocessing object on training and testing dataframes")
+            
             input_feature_train_arr = preprocessor_obj.fit_transform(input_features_train_df)
             input_feature_test_arr = preprocessor_obj.transform(input_features_test_df)
             

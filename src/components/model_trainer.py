@@ -12,6 +12,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor  
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.ensemble import AdaBoostRegressor 
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error 
 from src.utils import save_object
@@ -39,17 +40,53 @@ class ModelTrainer:
             models = {
                 'CatBoostRegressor': CatBoostRegressor(verbose=False),  # Added verbose=False to reduce output
                 'XGBRegressor': XGBRegressor(),
-                'SVR': SVR(),
                 'LinearRegression': LinearRegression(),
                 'RandomForestRegressor': RandomForestRegressor(),
                 'DecisionTreeRegressor': DecisionTreeRegressor(),
-                'KNeighborsRegressor': KNeighborsRegressor(),
-                'GradientBoostingRegressor': GradientBoostingRegressor()
+                'GradientBoostingRegressor': GradientBoostingRegressor(),
+                "AdaBoostRegressor": AdaBoostRegressor()
             }
-            
+            params={
+                "DecisionTreeRegressor": {
+                    'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                    # 'splitter':['best','random'],
+                    # 'max_features':['sqrt','log2'],
+                },
+                "RandomForestRegressor":{
+                    # 'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                 
+                    # 'max_features':['sqrt','log2',None],
+                    'n_estimators': [8,16,32,64,128,256]
+                },
+                "GradientBoostingRegressor":{
+                    # 'loss':['squared_error', 'huber', 'absolute_error', 'quantile'],
+                    'learning_rate':[.1,.01,.05,.001],
+                    'subsample':[0.6,0.7,0.75,0.8,0.85,0.9],
+                    # 'criterion':['squared_error', 'friedman_mse'],
+                    # 'max_features':['auto','sqrt','log2'],
+                    'n_estimators': [8,16,32,64,128,256]
+                },
+                "LinearRegression":{},
+                "XGBRegressor":{
+                    'learning_rate':[.1,.01,.05,.001],
+                    'n_estimators': [8,16,32,64,128,256]
+                },
+                "CatBoostRegressor":{
+                    'depth': [6,8,10],
+                    'learning_rate': [0.01, 0.05, 0.1],
+                    'iterations': [30, 50, 100]
+                },
+                "AdaBoostRegressor":{
+                    'learning_rate':[.1,.01,0.5,.001],
+                    # 'loss':['linear','square','exponential'],
+                    'n_estimators': [8,16,32,64,128,256]
+                }
+                
+            }
+
             # Use evaluate_models function to get initial model comparison
             logging.info("Evaluating all models...")
-            model_report = evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, models=models)
+            model_report = evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, models=models, param=params)
             
             # Get the best model based on R2 score
             best_model_score = max(model_report.values())
